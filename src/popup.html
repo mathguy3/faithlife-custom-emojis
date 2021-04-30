@@ -2,8 +2,55 @@
 <html style="width: 215px">
 	<head>
 		<title>Custom Emojis</title>
+		<script src="emojiReference.js"></script>
+		<script src="popup.js"></script>
+		<style>
+			body {
+				margin: 0;
+				padding: 8px;
+				box-sizing: border-box;
+			}
+
+			#favorite {
+				margin-right: 5px;
+			}
+
+			.emoji-entry {
+				height: 25px;
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+			}
+
+			h2 {
+				margin-top: 4px;
+			}
+
+			h4 {
+				margin-bottom: 10px;
+			}
+
+			.emoji-text {
+				flex-basis: 170px;
+			}
+
+			.saved-emojis {
+				max-height: 250px;
+				overflow-y: auto;
+			}
+
+			.emoji-delete-x {
+				margin-left: 12px;
+				cursor: pointer;
+				user-select: none;
+			}
+		</style>
 	</head>
 	<body style="width: 100%">
 		<h2>Faithlife Messages Custom Emojis</h2>
+		<input id="favorite" /><button id="add">Add</button>
+		<br />
+		<h4>Saved Emojis</h4>
+		<div id="saved-emojis"></div>
 	</body>
 </html>
