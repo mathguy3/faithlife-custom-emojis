@@ -10,7 +10,7 @@
 	"content_scripts": [
 		{
 			"matches": ["https://beta.faithlife.com/messages/*", "https://faithlife.com/messages/*", "https://internal.faithlife.com/messages/*"],
-			"js": ["emojiReference.js", "content.js"],
+			"js": ["emojiReference.js", "utilities.js", "setup.js", "replace.js", "reactions.js"],
 			"run_at": "document_start"
 		}
 	],
