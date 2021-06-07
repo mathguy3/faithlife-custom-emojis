@@ -2,17 +2,30 @@
 	"manifest_version": 2,
 	"name": "Faithlife Custom Emojis",
 	"description": "Replaces emoji text with actual emojis in Faithlife Messages",
-	"version": "2.0",
+	"version": "2.1.0",
 	"browser_action": {
 		"default_icon": "icon.png",
 		"default_popup": "popup.html"
 	},
 	"content_scripts": [
 		{
-			"matches": ["https://beta.faithlife.com/messages/*", "https://faithlife.com/messages/*", "https://internal.faithlife.com/messages/*"],
-			"js": ["emojiReference.js", "utilities.js", "setup.js", "replace.js", "reactions.js"],
+			"matches": [
+				"https://beta.faithlife.com/messages/*",
+				"https://faithlife.com/messages/*",
+				"https://internal.faithlife.com/messages/*"
+			],
+			"js": [
+				"emojiReference.js",
+				"utilities.js",
+				"setup.js",
+				"replace.js",
+				"reactions.js"
+			],
 			"run_at": "document_start"
 		}
 	],
-	"permissions": ["activeTab", "storage"]
+	"permissions": [
+		"activeTab",
+		"storage"
+	]
 }
