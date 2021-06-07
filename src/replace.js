@@ -8,6 +8,9 @@ waitForOnce(
 		observer.observe(messageContainer, { attributes: true, childList: true, subtree: true });
 		messageContainer.addEventListener("dom-changed", replaceEmojis);
 		replaceEmojis({ target: messageContainer, details: [] });
+
+		const messageEditor = document.querySelector(".conversation-reply-editor");
+		messageEditor.addEventListener("input", watchInput);
 	}
 );
 
@@ -45,5 +48,35 @@ function replaceEmojis(e) {
 		if (content != newContent) {
 			reaction.innerHTML = newContent;
 		}
+	}
+}
+
+function watchInput(e) {
+	const searchInput = e.target;
+	const inputText = searchInput.innerText;
+	const emojiStart = inputText.lastIndexOf(":") + 1;
+	const emojiSearchText = inputText.slice(emojiStart);
+	const popupContainer = queryForSingle(document, 'popup-container--relative');
+
+	if (!emojiSearchText.length || !popupContainer) {
+		return;
+	}
+	const emojiNameMatches = getEmojiNameMatches(emojiSearchText);
+	const resultList = emojiNameMatches.map(x => [x, allEmojis[x]]);
+
+	const allPreviousEntries = queryForAll(popupContainer, "search-custom-emoji");
+	const isArrowKey = e.key == "ArrowRight" || e.key == "ArrowDown" || e.key == "ArrowUp" || e.key == "ArrowLeft";
+	if (allPreviousEntries.length) {
+		if (isArrowKey) {
+			return;
+		} else {
+			for (let i = 0; i < allPreviousEntries.length; i++) {
+				allPreviousEntries[i].remove();
+			}
+		}
+	}
+
+	if (resultList.length) {
+		addSearchResultsToPopup(popupContainer, resultList, null, "background: #f2f2f2");
 	}
 }

@@ -1,3 +1,5 @@
+const emojiNames = Object.keys(allEmojis);
+
 function waitForOnce(condition, callback) {
 	return waitFor(condition, callback, true);
 }
@@ -68,4 +70,47 @@ function setStorage(key, value) {
 		reject("Extension storage not found. The extension may have just been updated.");
 	}
 	chrome.storage.sync.set({ [key]: value });
+}
+
+function addSearchResultsToPopup(popupBox, results, onClick, extraStyles) {
+	const searchBox = queryForSingle(popupBox, "navigable-results--results", "ul");
+
+	const emojiClassName = findClassName(searchBox, "emoji-box--emoji");
+	const emojiCharClassName = findClassName(searchBox, "emoji-box--emoji-char");
+	const emojiNameClassName = findClassName(searchBox, "emoji-box--emoji-name");
+
+	for (let i = 0; i < results.length; i++) {
+		const emojiName = results[i][0];
+		const emojiUrl = results[i][1];
+		const searchEntry = document.createElement("li");
+		searchEntry.classList.add("search-custom-emoji");
+		searchEntry.innerHTML = `
+				<button title="${emojiName}" class="${emojiClassName}" style="position:relative;${extraStyles ?? ''}">
+					<img src="https://files.logoscdn.com/v1/files/50162603/assets/11772906/content.png?signature=MsfmHwthtGGg9-yYK90uAUe1iO0" style="width:10px; height:10px; object-fit:cover; border-radius:50%; position: absolute; right: 8px; top:8px" />
+					<div class="${emojiCharClassName}">
+						<img src="${emojiUrl}" style="width: 20px;"></img>
+					</div>
+					<div class="${emojiNameClassName}">${emojiName}</div>
+				</button>`;
+		if (onClick) {
+			searchEntry.addEventListener("click", onClick);
+		}
+
+		if (searchBox) {
+			searchBox.prepend(searchEntry);
+		} else {
+			const notFoundBox = queryForSingle(popupBox, "emoji-box--no-results");
+			if (notFoundBox) {
+				notFoundBox.innerHTML = searchEntry.outerHTML;
+			}
+		}
+	}
+}
+
+function getEmojiNameMatches(searchText) {
+	const exactEmojiName = emojiNames.find((x) => x == searchText);
+	const emojiNameFuzzyMatches = emojiNames.filter((x) => x.includes(searchText)).splice(0, 3);
+	let emojiNameMatches = [...(exactEmojiName ? [exactEmojiName] : []), ...emojiNameFuzzyMatches];
+	emojiNameMatches = Array.from(new Set(emojiNameMatches));
+	return emojiNameMatches.reverse();
 }

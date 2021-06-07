@@ -1,5 +1,3 @@
-const emojiNames = Object.keys(allEmojis);
-
 // Reaction Emoji Box
 waitFor(
 	(node) => {
@@ -60,27 +58,24 @@ waitFor(
 function addCustomEmojiText(e) {
 	const searchInput = e.target;
 	const emojiSearchText = searchInput.value;
-	const exactEmojiName = emojiNames.find((x) => x == emojiSearchText);
-	const emojiNameFuzzyMatches = emojiNames.filter((x) => x.includes(emojiSearchText)).splice(0, 3);
-	const emojiNameMatches = [...(exactEmojiName ? [exactEmojiName] : []), ...emojiNameFuzzyMatches];
-
-	const emojiUrls = emojiNameMatches.map(x => allEmojis[x])
+	const emojiNameMatches = getEmojiNameMatches(emojiSearchText);
+	const resultList = emojiNameMatches.map(x => [x, allEmojis[x]])
 
 	const emojiBox = queryUp(searchInput, "emoji-box--emoji-box");
-	const anyResults = queryForAll(emojiBox, "navigable-results--results");
-	if (!anyResults?.length) {
-		return;
-	}
-	const selectedClassName = findClassName(emojiBox, "navigable-results--results");
 
-	const previousEntry = emojiBox.querySelector(".search-custom-emoji");
+	const firstPreviousEntry = emojiBox.querySelector(".search-custom-emoji:first-of-type");
 	const allPreviousEntries = emojiBox.querySelectorAll(".search-custom-emoji");
 	const isArrowKey = e.key == "ArrowRight" || e.key == "ArrowDown" || e.key == "ArrowUp" || e.key == "ArrowLeft";
-	if (previousEntry) {
+	if (allPreviousEntries.length) {
 		if (isArrowKey) {
 			if (e.key == "ArrowDown") {
-				const emojiButton = queryForSingle(previousEntry, "emoji-box--emoji", "button");
-				emojiButton.classList.remove(selectedClassName);
+				const anyResults = queryForAll(emojiBox, "navigable-results--results");
+				if (anyResults?.length) {
+					const selectedClassName = findClassName(emojiBox, "navigable-results--results");
+
+					const emojiButton = queryForSingle(firstPreviousEntry, "emoji-box--emoji", "button");
+					emojiButton.classList.remove(selectedClassName);
+				}
 			}
 			if (e.key == "ArrowUp") {
 			}
@@ -92,44 +87,14 @@ function addCustomEmojiText(e) {
 		}
 	}
 
-	if (emojiUrls.length) {
-		const searchBox = queryForSingle(emojiBox, "navigable-results--results", "ul");
-
-		const emojiClassName = findClassName(searchBox, "emoji-box--emoji");
-		const emojiCharClassName = findClassName(searchBox, "emoji-box--emoji-char");
-		const emojiNameClassName = findClassName(searchBox, "emoji-box--emoji-name");
-
-		for (let i = 0; i < emojiUrls.length; i++) {
-			const emojiName = emojiNameMatches[i];
-			const emojiUrl = emojiUrls[i];
-			const searchEntry = document.createElement("li");
-			searchEntry.classList.add("search-custom-emoji");
-			searchEntry.innerHTML = `
-				<button title="${emojiName}" class="${emojiClassName} ${selectedClassName}" style="position:relative;">
-					<img src="https://files.logoscdn.com/v1/files/50162603/assets/11772906/content.png?signature=MsfmHwthtGGg9-yYK90uAUe1iO0" style="width:10px; height:10px; object-fit:cover; border-radius:50%; position: absolute; right: 8px; top:8px" />
-					<div class="${emojiCharClassName}">
-						<img src="${emojiUrl}" style="width: 20px;"></img>
-					</div>
-					<div class="${emojiNameClassName}">${emojiName}</div>
-				</button>`;
-
-			searchEntry.addEventListener("click", reactFromSearch);
-
-			if (searchBox) {
-				searchBox.prepend(searchEntry);
-			} else {
-				const notFoundBox = emojiBox.queryForSingle("emoji-box--no-results");
-				if (notFoundBox) {
-					notFoundBox.innerHTML = searchEntry.outerHTML;
-				}
-			}
-		}
+	if (resultList.length) {
+		addSearchResultsToPopup(emojiBox, resultList, reactFromSearch);
 	}
 
-	if (e.keyCode === 13 && emojiNameMatches.length) {
+	if (e.keyCode === 13 && resultList.length) {
 		const message = searchInput.closest(".message");
 		const messageId = message.getAttribute("data-message-id");
-		reactToMessage(messageId, emojiNameMatches[0]);
+		reactToMessage(messageId, resultList[0][0]);
 	}
 }
 
