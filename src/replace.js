@@ -18,7 +18,7 @@ function replaceEmojis(e) {
 	}
 
 	// Replace within messages
-	var messages = e.target.querySelectorAll(".message__contents p");
+	var messages = e.target.querySelectorAll(".message__contents > :not(.conversation-edit-message-editor) p");
 	for (var i = 0; i < messages.length; i++) {
 		var message = messages[i];
 		var content = message.innerHTML;
