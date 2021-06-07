@@ -37,12 +37,21 @@ function queryForAll(element, search, pre = "", post = "") {
 	return element.querySelectorAll(`${pre}[class^="${search}"]${post}`);
 }
 
-function queryFor(element, search, pre = "", post = "") {
+function queryForSingle(element, search, pre = "", post = "") {
 	return element.querySelector(`${pre}[class^="${search}"]${post}`);
 }
 
-function findClassName(element, start) {
-	return [...queryFor(element, start).classList].find((x) => x.startsWith(start));
+function findClassName(element, startOfClass) {
+	let className;
+	try {
+		let match = queryForSingle(element, startOfClass);
+		let classes = [...match.classList];
+		className = classes.find((x) => x.startsWith(startOfClass));
+	} catch(e){
+		console.log("Error finding className matching", startOfClass, "in", element);
+		throw e;
+	}
+	return className;
 }
 
 async function getStorageOrDefault(key, def = {}) {
