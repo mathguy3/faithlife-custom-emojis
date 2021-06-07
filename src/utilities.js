@@ -47,7 +47,7 @@ function findClassName(element, startOfClass) {
 		let match = queryForSingle(element, startOfClass);
 		let classes = [...match.classList];
 		className = classes.find((x) => x.startsWith(startOfClass));
-	} catch(e){
+	} catch (e) {
 		console.log("Error finding className matching", startOfClass, "in", element);
 		throw e;
 	}
