@@ -77,6 +77,26 @@ function watchInput(e) {
 	}
 
 	if (resultList.length) {
-		addSearchResultsToPopup(popupContainer, resultList, null, "background: #f2f2f2");
+		addSearchResultsToPopup(popupContainer, resultList, tryAddText);
 	}
+}
+
+function tryAddText(e) {
+	const messageEditor = document.querySelector(".conversation-reply-editor .ql-editor");
+	const editorContents = messageEditor.innerText;
+	const emojiStart = editorContents.lastIndexOf(":") + 1;
+	const selection = window.getSelection();
+	const range = selection.getRangeAt(0);
+	const sel = selection.baseNode;
+	range.setStart(sel, emojiStart)
+	range.setEnd(sel, editorContents.length);
+	selection.removeAllRanges();
+	selection.addRange(range);
+
+	const menuItem = e.currentTarget;
+	const emojiName = menuItem.getAttribute("data-emoji-name");
+	const additionalText = emojiName + ":";
+	range.deleteContents();
+	range.insertNode(document.createTextNode(additionalText));
+	range.collapse();
 }

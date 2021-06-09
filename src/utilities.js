@@ -32,27 +32,44 @@ function waitFor(condition, callback, once = false) {
 }
 
 function queryUp(element, search, pre = "", post = "") {
-	return element.closest(`${pre}[class^="${search}"]${post}`);
+	try {
+		return element.closest(`${pre}[class^="${search}"]${post}`);
+	} catch (e) {
+		throw new Error(`For element: ${element} - search: ${startOfClass} - ${e.message}`);
+	}
 }
 
 function queryForAll(element, search, pre = "", post = "") {
-	return element.querySelectorAll(`${pre}[class^="${search}"]${post}`);
+	try {
+		return element.querySelectorAll(`${pre}[class^="${search}"]${post}`);
+	} catch (e) {
+		throw new Error(`For element: ${element} - search: ${startOfClass} - ${e.message}`);
+	}
 }
 
 function queryForSingle(element, search, pre = "", post = "") {
-	return element.querySelector(`${pre}[class^="${search}"]${post}`);
+	try {
+		return element.querySelector(`${pre}[class^="${search}"]${post}`);
+	} catch (e) {
+		throw new Error(`For element: ${element} - search: ${startOfClass} - ${e.message}`);
+	}
 }
 
+const classNameCache = {};
+
 function findClassName(element, startOfClass) {
+	if (classNameCache[startOfClass]) {
+		return classNameCache[startOfClass];
+	}
 	let className;
 	try {
 		let match = queryForSingle(element, startOfClass);
 		let classes = [...match.classList];
 		className = classes.find((x) => x.startsWith(startOfClass));
 	} catch (e) {
-		console.log("Error finding className matching", startOfClass, "in", element);
-		throw e;
+		throw new Error(`For element: ${element} - search: ${startOfClass} - ${e.message}`);
 	}
+	classNameCache[startOfClass] = className;
 	return className;
 }
 
@@ -72,7 +89,7 @@ function setStorage(key, value) {
 	chrome.storage.sync.set({ [key]: value });
 }
 
-function addSearchResultsToPopup(popupBox, results, onClick, extraStyles) {
+function addSearchResultsToPopup(popupBox, results, onClick) {
 	const searchBox = queryForSingle(popupBox, "navigable-results--results", "ul");
 
 	const emojiClassName = findClassName(searchBox, "emoji-box--emoji");
@@ -83,9 +100,10 @@ function addSearchResultsToPopup(popupBox, results, onClick, extraStyles) {
 		const emojiName = results[i][0];
 		const emojiUrl = results[i][1];
 		const searchEntry = document.createElement("li");
+		searchEntry.setAttribute("data-emoji-name", emojiName);
 		searchEntry.classList.add("search-custom-emoji");
 		searchEntry.innerHTML = `
-				<button title="${emojiName}" class="${emojiClassName}" style="position:relative;${extraStyles ?? ''}">
+				<button title="${emojiName}" class="${emojiClassName}" style="position:relative;">
 					<img src="https://files.logoscdn.com/v1/files/50162603/assets/11772906/content.png?signature=MsfmHwthtGGg9-yYK90uAUe1iO0" style="width:10px; height:10px; object-fit:cover; border-radius:50%; position: absolute; right: 8px; top:8px" />
 					<div class="${emojiCharClassName}">
 						<img src="${emojiUrl}" style="width: 20px;"></img>
